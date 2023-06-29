@@ -1,29 +1,49 @@
+use serde::Serialize;
+
 use super::piece::{Piece, PieceType, Team};
 
+#[derive(Serialize)]
 pub struct Board {
-    pieces: [Option<Piece>; 64],
+    #[serde(serialize_with = "serialize_pieces")]
+    pub pieces: [Option<Piece>; 64],
+}
+
+// Custom serializer for the pieces array
+fn serialize_pieces<S>(pieces: &[Option<Piece>; 64], serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    let piece_list: Vec<&Option<Piece>> = pieces.iter().collect();
+    piece_list.serialize(serializer)
 }
 
 //Starting board:
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 
 impl Board {
-    pub fn new(fen_string: &str) -> Self {
+    pub fn from_fen(fen_string: &str) -> Self {
         let mut board = Board { pieces: [None; 64] };
 
-        let mut fen_chars: Vec<char> = Vec::new();
+        let mut fen_chars: Vec<char> = vec!['.'; 64];
 
-        for (i, substring) in fen_string.split('/').rev().enumerate() {
-            for (j, ch) in substring.chars().enumerate() {
-                let digit = ch.to_digit(10);
+        let mut count = 0;
+        for ch in fen_string.chars() {
+            if ch == '/' {
+                continue;
+            }
 
-                match digit {
-                    Some(x) => {
-                        for _ in 0..x {
-                            fen_chars.insert(Board::get_index(i, j), '.');
-                        }
+            let digit = ch.to_digit(10);
+
+            match digit {
+                Some(x) => {
+                    for _ in 0..x {
+                        fen_chars[count] = '.';
+                        count = count + 1;
                     }
-                    _ => fen_chars.insert(Board::get_index(i, j), ch),
+                }
+                _ => {
+                    fen_chars[count] = ch;
+                    count = count + 1;
                 }
             }
         }
@@ -54,26 +74,17 @@ impl Board {
         row * 8 + col
     }
 
-    pub fn get_piece(&self, row: usize, col: usize) -> Option<Piece> {
-        self.pieces[row * 8 + col]
-    }
-
     pub fn print(&self) {
-        for i in (0..8).rev() {
-            for j in 0..8 {
-                let piece = self.get_piece(i, j);
-                match piece {
-                    Some(x) => print!(
-                        "{}{}:{:?}->{:?} ",
-                        ('a' as u8 + j as u8) as char,
-                        i + 1,
-                        x.get_team(),
-                        x.get_piece_type()
-                    ),
-                    _ => print!("{:?} ", PieceType::Empty),
-                }
+        for i in 0..64 {
+            let piece = self.pieces[i];
+            match piece {
+                Some(x) => print!("{:?}->{:?} ", x.get_team(), x.get_piece_type()),
+                _ => print!("{:?} ", PieceType::Empty),
             }
-            println!();
+
+            if (i + 1) % 8 == 0 {
+                println!("");
+            }
         }
     }
 }

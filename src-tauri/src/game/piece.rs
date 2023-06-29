@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, Copy)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Copy, Serialize)]
 pub enum PieceType {
     Empty = 1 << 0,
     Pawn = 1 << 1,
@@ -9,13 +11,13 @@ pub enum PieceType {
     King = 1 << 6,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub enum Team {
     White = 0,
     Black = 1 << 7,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct Piece {
     piece_type: PieceType,
     team: Team,
