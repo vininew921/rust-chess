@@ -9,7 +9,5 @@ export const svgFromPieceInfo = (
     .toString()
     .toLowerCase()}.svg`;
 
-  console.log(img.src);
-
   return img;
 };

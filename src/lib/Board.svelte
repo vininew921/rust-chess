@@ -3,17 +3,14 @@
   import type { Piece } from "./models";
   import { svgFromPieceInfo } from "./utils";
 
-  var DOMURL = window.URL || window.webkitURL || window;
-
   const WIDTH = 600;
   const HEIGHT = 600;
   const BLACK_COLOR = "#053363";
   const WHITE_COLOR = "#0D698B";
   const COORD_COLOR = "#FFFFFF";
+  const CELL_SIZE = WIDTH / 8;
 
-  let cellSize = WIDTH / 8;
   let pieces: Array<Piece | null>;
-
   let gameCanvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
@@ -24,6 +21,8 @@
         result[i] = piece;
       })
     );
+
+    console.log(result);
 
     return result;
   };
@@ -45,14 +44,14 @@
       for (let col = 0; col < 8; col++) {
         ctx.fillStyle = blackSquare ? BLACK_COLOR : WHITE_COLOR;
         blackSquare = !blackSquare;
-        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
         if (col == 0) {
           ctx.fillStyle = COORD_COLOR;
           ctx.fillText(
             (8 - row).toString(),
-            col * cellSize + 1,
-            row * cellSize + cellSize / 2
+            col * CELL_SIZE + 1,
+            row * CELL_SIZE + CELL_SIZE / 2
           );
         }
 
@@ -60,8 +59,8 @@
           ctx.fillStyle = COORD_COLOR;
           ctx.fillText(
             charFromCol(col),
-            col * cellSize + 1 + cellSize / 2,
-            row * cellSize + cellSize - 2
+            col * CELL_SIZE + 1 + CELL_SIZE / 2,
+            row * CELL_SIZE + CELL_SIZE - 2
           );
         }
       }
@@ -80,10 +79,10 @@
         let img = svgFromPieceInfo(piece.piece_type, piece.team);
         ctx.drawImage(
           img,
-          col * cellSize + 2,
-          row * cellSize - 2,
-          cellSize - 4,
-          cellSize - 4
+          col * CELL_SIZE + 2,
+          row * CELL_SIZE - 2,
+          CELL_SIZE - 4,
+          CELL_SIZE - 4
         );
       }
     }

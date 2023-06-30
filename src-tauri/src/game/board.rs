@@ -1,21 +1,10 @@
-use serde::Serialize;
-
 use super::piece::{Piece, PieceType, Team};
 
-#[derive(Serialize)]
 pub struct Board {
-    #[serde(serialize_with = "serialize_pieces")]
     pub pieces: [Option<Piece>; 64],
 }
 
 // Custom serializer for the pieces array
-fn serialize_pieces<S>(pieces: &[Option<Piece>; 64], serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: serde::Serializer,
-{
-    let piece_list: Vec<&Option<Piece>> = pieces.iter().collect();
-    piece_list.serialize(serializer)
-}
 
 //Starting board:
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR

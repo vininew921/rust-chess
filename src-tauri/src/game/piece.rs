@@ -1,20 +1,20 @@
 use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize, PartialEq)]
 pub enum PieceType {
-    Empty = 1 << 0,
-    Pawn = 1 << 1,
-    Bishop = 1 << 2,
-    Knight = 1 << 3,
-    Rook = 1 << 4,
-    Queen = 1 << 5,
-    King = 1 << 6,
+    Empty = 0,
+    Pawn = 0b0001,
+    Bishop = 0b0010,
+    Knight = 0b0011,
+    Rook = 0b0100,
+    Queen = 0b0101,
+    King = 0b0110,
 }
 
 #[derive(Debug, Clone, Copy, Serialize)]
 pub enum Team {
-    White = 0,
-    Black = 1 << 7,
+    White = 0b0000,
+    Black = 0b1000,
 }
 
 #[derive(Debug, Clone, Copy, Serialize)]
@@ -27,8 +27,8 @@ pub struct Piece {
 impl Piece {
     pub fn new(piece_type: PieceType, team: Team) -> Self {
         Piece {
-            piece_type: piece_type,
-            team: team,
+            piece_type,
+            team,
             value: piece_type as u8 | team as u8,
         }
     }
@@ -46,7 +46,7 @@ impl Piece {
     }
 
     pub fn team_from_value(value: u8) -> Team {
-        match value & (1 << 7) {
+        match value & (7) {
             0 => Team::White,
             _ => Team::Black,
         }
