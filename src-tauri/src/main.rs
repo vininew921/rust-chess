@@ -10,6 +10,16 @@ fn get_board(board: tauri::State<'_, MutexBoard>) -> Vec<Option<Piece>> {
     Vec::from(board.0.lock().unwrap().pieces)
 }
 
+#[tauri::command]
+fn get_position(index: usize) -> String {
+    Board::coordinates_from_index(index)
+}
+
+#[tauri::command]
+fn get_piece(index: usize, board: tauri::State<'_, MutexBoard>) -> Option<Piece> {
+    board.0.lock().unwrap().pieces[index]
+}
+
 struct MutexBoard(Mutex<Board>);
 
 fn main() {
@@ -17,11 +27,10 @@ fn main() {
     println!("Initializing with FEN: {}", fen_string);
 
     let board = Board::from_fen(fen_string);
-    board.print();
 
     tauri::Builder::default()
         .manage(MutexBoard(Mutex::from(board)))
-        .invoke_handler(tauri::generate_handler![get_board])
+        .invoke_handler(tauri::generate_handler![get_board, get_position, get_piece])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

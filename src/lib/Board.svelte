@@ -14,24 +14,51 @@
   let gameCanvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
-  const get_board = async (): Promise<Array<Piece | null>> => {
+  window.onload = async () => {
+    pieces = await map_pieces();
+    ctx = gameCanvas.getContext("2d");
+    drawGrid();
+    drawPieces();
+
+    gameCanvas.onclick = handleClick;
+  };
+
+  const map_pieces = async (): Promise<Array<Piece | null>> => {
     let result: Array<Piece | null> = new Array(64);
-    await invoke("get_board").then((res: Array<Piece | null>) =>
+    await api_get_board().then((res) =>
       res.map((piece, i) => {
         result[i] = piece;
       })
     );
 
-    console.log(result);
+    return result;
+  };
+
+  const api_get_board = async (): Promise<Array<Piece | null> | null> => {
+    let result: Array<Piece | null> | null = null;
+    await invoke("get_board").then((res: Array<Piece | null>) => {
+      result = res;
+    });
 
     return result;
   };
 
-  window.onload = async () => {
-    pieces = await get_board();
-    ctx = gameCanvas.getContext("2d");
-    drawGrid();
-    drawPieces();
+  const api_get_piece = async (index: number): Promise<Piece | null> => {
+    let result: Piece | null = null;
+    await invoke("get_piece", { index: index }).then(
+      (res: Piece | null) => (result = res)
+    );
+
+    return result;
+  };
+
+  const api_get_position = async (index: number): Promise<String> => {
+    let result: String | null = null;
+    await invoke("get_position", { index: index }).then((res: String) => {
+      result = res;
+    });
+
+    return result;
   };
 
   const charFromCol = (col: number): string => {
@@ -46,25 +73,29 @@
         blackSquare = !blackSquare;
         ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
-        if (col == 0) {
-          ctx.fillStyle = COORD_COLOR;
-          ctx.fillText(
-            (8 - row).toString(),
-            col * CELL_SIZE + 1,
-            row * CELL_SIZE + CELL_SIZE / 2
-          );
-        }
-
-        if (row == 7) {
-          ctx.fillStyle = COORD_COLOR;
-          ctx.fillText(
-            charFromCol(col),
-            col * CELL_SIZE + 1 + CELL_SIZE / 2,
-            row * CELL_SIZE + CELL_SIZE - 2
-          );
-        }
+        drawCoordinates(row, col);
       }
       blackSquare = !blackSquare;
+    }
+  };
+
+  const drawCoordinates = (row: number, col: number) => {
+    if (col == 0) {
+      ctx.fillStyle = COORD_COLOR;
+      ctx.fillText(
+        (8 - row).toString(),
+        col * CELL_SIZE + 1,
+        row * CELL_SIZE + CELL_SIZE / 2
+      );
+    }
+
+    if (row == 7) {
+      ctx.fillStyle = COORD_COLOR;
+      ctx.fillText(
+        charFromCol(col),
+        col * CELL_SIZE + 1 + CELL_SIZE / 2,
+        row * CELL_SIZE + CELL_SIZE - 2
+      );
     }
   };
 
@@ -86,6 +117,28 @@
         );
       }
     }
+  };
+
+  const get_index = (row: number, col: number): number => {
+    return row * 8 + col;
+  };
+
+  const index_from_mousepos = (x: number, y: number) => {
+    var rect = gameCanvas.getBoundingClientRect();
+
+    let mouseX = x - rect.left;
+    let mouseY = y - rect.top;
+
+    let indexX = Math.floor(mouseX / (WIDTH / 8));
+    let indexY = Math.floor(mouseY / (HEIGHT / 8));
+
+    return get_index(indexY, indexX);
+  };
+
+  const handleClick = async (ev: MouseEvent) => {
+    let index = index_from_mousepos(ev.clientX, ev.clientY);
+    console.log(await api_get_piece(index));
+    console.log(await api_get_position(index));
   };
 </script>
 

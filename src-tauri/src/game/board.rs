@@ -4,8 +4,6 @@ pub struct Board {
     pub pieces: [Option<Piece>; 64],
 }
 
-// Custom serializer for the pieces array
-
 //Starting board:
 //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 
@@ -61,6 +59,24 @@ impl Board {
 
     pub fn get_index(row: usize, col: usize) -> usize {
         row * 8 + col
+    }
+
+    pub fn get_row_col(index: usize) -> (usize, usize) {
+        let row = index / 8;
+        let col = index % 8;
+
+        (row, col)
+    }
+
+    pub fn coordinates_from_index(index: usize) -> String {
+        let (row, col) = Board::get_row_col(index);
+
+        let col_str = (8 - row).to_string();
+        let row_str = ('A' as u8 + col as u8) as char;
+
+        let result = format!("{}{}", row_str, col_str);
+
+        result
     }
 
     pub fn print(&self) {
