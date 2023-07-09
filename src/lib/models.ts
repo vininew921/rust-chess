@@ -13,8 +13,19 @@ export enum Team {
   Black = 0b1000,
 }
 
+export type Board = {
+  pieces: Array<Piece | null>;
+  available_moves: Array<Move>;
+};
+
 export type Piece = {
   piece_type: PieceType;
   team: Team;
   value: number;
+  index: number;
+};
+
+export type Move = {
+  from: number;
+  to: number;
 };

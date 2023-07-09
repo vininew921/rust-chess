@@ -1,7 +1,16 @@
-use super::piece::{Piece, PieceType, Team};
+use std::ops::Index;
 
+use serde::Serialize;
+
+use super::{
+    moves::Move,
+    piece::{Piece, PieceType, Team},
+};
+
+#[derive(Clone, Serialize)]
 pub struct Board {
-    pub pieces: [Option<Piece>; 64],
+    pieces: Vec<Option<Piece>>,
+    avaliable_moves: Vec<Move>,
 }
 
 //Starting board:
@@ -9,7 +18,10 @@ pub struct Board {
 
 impl Board {
     pub fn from_fen(fen_string: &str) -> Self {
-        let mut board = Board { pieces: [None; 64] };
+        let mut board = Board {
+            pieces: vec![None; 64],
+            avaliable_moves: Vec::new(),
+        };
 
         let mut fen_chars: Vec<char> = vec!['.'; 64];
 
@@ -37,51 +49,63 @@ impl Board {
 
         for (i, ch) in fen_chars.iter().enumerate() {
             board.pieces[i] = match ch {
-                'p' => Option::from(Piece::new(PieceType::Pawn, Team::Black)),
-                'P' => Option::from(Piece::new(PieceType::Pawn, Team::White)),
-                'r' => Option::from(Piece::new(PieceType::Rook, Team::Black)),
-                'R' => Option::from(Piece::new(PieceType::Rook, Team::White)),
-                'n' => Option::from(Piece::new(PieceType::Knight, Team::Black)),
-                'N' => Option::from(Piece::new(PieceType::Knight, Team::White)),
-                'b' => Option::from(Piece::new(PieceType::Bishop, Team::Black)),
-                'B' => Option::from(Piece::new(PieceType::Bishop, Team::White)),
-                'q' => Option::from(Piece::new(PieceType::Queen, Team::Black)),
-                'Q' => Option::from(Piece::new(PieceType::Queen, Team::White)),
-                'k' => Option::from(Piece::new(PieceType::King, Team::Black)),
-                'K' => Option::from(Piece::new(PieceType::King, Team::White)),
+                'p' => Option::from(Piece::new(PieceType::Pawn, Team::Black, i)),
+                'P' => Option::from(Piece::new(PieceType::Pawn, Team::White, i)),
+                'r' => Option::from(Piece::new(PieceType::Rook, Team::Black, i)),
+                'R' => Option::from(Piece::new(PieceType::Rook, Team::White, i)),
+                'n' => Option::from(Piece::new(PieceType::Knight, Team::Black, i)),
+                'N' => Option::from(Piece::new(PieceType::Knight, Team::White, i)),
+                'b' => Option::from(Piece::new(PieceType::Bishop, Team::Black, i)),
+                'B' => Option::from(Piece::new(PieceType::Bishop, Team::White, i)),
+                'q' => Option::from(Piece::new(PieceType::Queen, Team::Black, i)),
+                'Q' => Option::from(Piece::new(PieceType::Queen, Team::White, i)),
+                'k' => Option::from(Piece::new(PieceType::King, Team::Black, i)),
+                'K' => Option::from(Piece::new(PieceType::King, Team::White, i)),
                 '.' => None,
                 _ => panic!("Invalid FEN character: {}", ch),
             }
         }
 
+        board.generate_moves();
         board
     }
 
-    pub fn get_index(row: usize, col: usize) -> usize {
-        row * 8 + col
+    pub fn generate_moves(&mut self) {
+        self.avaliable_moves.clear();
+
+        for i in 0..self.pieces.len() {
+            if let Some(piece) = self.get_piece(i) {
+                let available_moves = match piece.get_piece_type() {
+                    PieceType::Knight => Move::knight(piece, self),
+                    _ => Vec::new(),
+                };
+
+                for am in available_moves {
+                    self.avaliable_moves.push(am);
+                }
+            }
+        }
     }
 
-    pub fn get_row_col(index: usize) -> (usize, usize) {
-        let row = index / 8;
-        let col = index % 8;
-
-        (row, col)
+    pub fn get_pieces(&self) -> Vec<Option<Piece>> {
+        self.pieces.clone()
     }
 
-    pub fn coordinates_from_index(index: usize) -> String {
-        let (row, col) = Board::get_row_col(index);
+    pub fn get_piece(&self, index: usize) -> &Option<Piece> {
+        self.pieces.index(index)
+    }
 
-        let col_str = (8 - row).to_string();
-        let row_str = ('A' as u8 + col as u8) as char;
-
-        let result = format!("{}{}", row_str, col_str);
-
-        result
+    pub fn get_piece_moves(&self, index: usize) -> Vec<Move> {
+        self.avaliable_moves
+            .iter()
+            .filter(|&mov| mov.from == index)
+            .cloned()
+            .collect()
     }
 
     pub fn print(&self) {
         for i in 0..64 {
-            let piece = self.pieces[i];
+            let piece = self.get_piece(i);
             match piece {
                 Some(x) => print!("{:?}->{:?} ", x.get_team(), x.get_piece_type()),
                 _ => print!("{:?} ", PieceType::Empty),
@@ -91,5 +115,27 @@ impl Board {
                 println!("");
             }
         }
+    }
+
+    pub fn get_index(row: usize, col: usize) -> usize {
+        row * 8 + col
+    }
+
+    pub fn get_row_col(index: i32) -> (i32, i32) {
+        let row = index / 8;
+        let col = index % 8;
+
+        (row, col)
+    }
+
+    pub fn coordinates_from_index(index: usize) -> String {
+        let (row, col) = Board::get_row_col(index as i32);
+
+        let col_str = (8 - row).to_string();
+        let row_str = ('A' as u8 + col as u8) as char;
+
+        let result = format!("{}{}", row_str, col_str);
+
+        result
     }
 }

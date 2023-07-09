@@ -1,6 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
-  import type { Piece } from "./models";
+  import type { Board, Move, Piece } from "./models";
   import { svgFromPieceInfo } from "./utils";
 
   const WIDTH = 600;
@@ -9,13 +9,15 @@
   const WHITE_COLOR = "#0D698B";
   const COORD_COLOR = "#FFFFFF";
   const CELL_SIZE = WIDTH / 8;
+  const DEBUG_FLAG = true;
 
-  let pieces: Array<Piece | null>;
+  let board: Board;
   let gameCanvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
   window.onload = async () => {
-    pieces = await map_pieces();
+    board = await api_get_board();
+    console.log(board);
     ctx = gameCanvas.getContext("2d");
     drawGrid();
     drawPieces();
@@ -23,20 +25,9 @@
     gameCanvas.onclick = handleClick;
   };
 
-  const map_pieces = async (): Promise<Array<Piece | null>> => {
-    let result: Array<Piece | null> = new Array(64);
-    await api_get_board().then((res) =>
-      res.map((piece, i) => {
-        result[i] = piece;
-      })
-    );
-
-    return result;
-  };
-
-  const api_get_board = async (): Promise<Array<Piece | null> | null> => {
-    let result: Array<Piece | null> | null = null;
-    await invoke("get_board").then((res: Array<Piece | null>) => {
+  const api_get_board = async (): Promise<Board> => {
+    let result: Board;
+    await invoke("get_board").then((res: Board) => {
       result = res;
     });
 
@@ -80,12 +71,21 @@
   };
 
   const drawCoordinates = (row: number, col: number) => {
+    if (DEBUG_FLAG) {
+      ctx.fillStyle = "black";
+      ctx.fillText(
+        (row * 8 + col).toString(),
+        col * CELL_SIZE + 1,
+        row * CELL_SIZE + CELL_SIZE
+      );
+    }
+
     if (col == 0) {
       ctx.fillStyle = COORD_COLOR;
       ctx.fillText(
         (8 - row).toString(),
-        col * CELL_SIZE + 1,
-        row * CELL_SIZE + CELL_SIZE / 2
+        col * CELL_SIZE + 1 + CELL_SIZE / 2,
+        row * CELL_SIZE + CELL_SIZE - 2
       );
     }
 
@@ -102,7 +102,7 @@
   const drawPieces = () => {
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
-        let piece = pieces[row * 8 + col];
+        let piece = board.pieces[row * 8 + col];
         if (!piece) {
           continue;
         }
