@@ -76,7 +76,12 @@ impl Board {
         for i in 0..self.pieces.len() {
             if let Some(piece) = self.get_piece(i) {
                 let available_moves = match piece.get_piece_type() {
+                    PieceType::Bishop => Move::bishop(piece, self),
+                    PieceType::King => Move::king(piece, self),
                     PieceType::Knight => Move::knight(piece, self),
+                    PieceType::Pawn => Move::pawn(piece, self),
+                    PieceType::Queen => Move::queen(piece, self),
+                    PieceType::Rook => Move::rook(piece, self),
                     _ => Vec::new(),
                 };
 

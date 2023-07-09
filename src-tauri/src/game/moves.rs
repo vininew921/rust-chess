@@ -9,36 +9,32 @@ pub struct Move {
 }
 
 impl Move {
-    pub fn knight(piece: &Piece, board: &Board) -> Vec<Move> {
+    pub fn bishop(_piece: &Piece, _board: &Board) -> Vec<Move> {
+        Vec::new()
+    }
+
+    pub fn king(piece: &Piece, board: &Board) -> Vec<Move> {
         let mut result: Vec<Move> = Vec::new();
         let index = piece.get_index();
-        let (py, px) = Board::get_row_col(index as i32);
-
-        if index == 1 {
-            println!("Looking at index {}, px {} py {}", index, px, py);
-        }
+        let (row, col) = Board::get_row_col(index as i32);
 
         let targets = vec![
-            (px + 2, py + 1),
-            (px + 2, py - 1),
-            (px + 1, py + 2),
-            (px + 1, py - 2),
-            (px - 1, py - 2),
-            (px - 1, py + 2),
-            (px - 2, py - 1),
-            (px - 2, py + 1),
+            (row - 1, col - 1),
+            (row - 1, col),
+            (row - 1, col + 1),
+            (row, col - 1),
+            (row, col + 1),
+            (row + 1, col - 1),
+            (row + 1, col),
+            (row + 1, col + 1),
         ];
 
-        for (tx, ty) in targets.into_iter() {
-            if Move::out_of_bounds(tx, ty) {
+        for (t_row, t_col) in targets.into_iter() {
+            if Move::out_of_bounds(t_row, t_col) {
                 continue;
             }
 
-            if index == 1 {
-                print!("Looking at tx {} ty {}", tx, ty);
-            }
-
-            let target_index = Board::get_index(ty as usize, tx as usize);
+            let target_index = Board::get_index(t_row as usize, t_col as usize);
             if index == 1 {
                 println!(" target index: {}", target_index);
             }
@@ -56,6 +52,59 @@ impl Move {
         }
 
         result
+    }
+
+    pub fn knight(piece: &Piece, board: &Board) -> Vec<Move> {
+        let mut result: Vec<Move> = Vec::new();
+        let index = piece.get_index();
+        let (row, col) = Board::get_row_col(index as i32);
+
+        let targets = vec![
+            (row + 2, col + 1),
+            (row + 2, col - 1),
+            (row + 1, col + 2),
+            (row + 1, col - 2),
+            (row - 1, col - 2),
+            (row - 1, col + 2),
+            (row - 2, col - 1),
+            (row - 2, col + 1),
+        ];
+
+        for (t_row, t_col) in targets.into_iter() {
+            if Move::out_of_bounds(t_row, t_col) {
+                continue;
+            }
+
+            let target_index = Board::get_index(t_row as usize, t_col as usize);
+            if index == 1 {
+                println!(" target index: {}", target_index);
+            }
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    continue;
+                }
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+            });
+        }
+
+        result
+    }
+
+    pub fn pawn(_piece: &Piece, _board: &Board) -> Vec<Move> {
+        Vec::new()
+    }
+
+    pub fn queen(_piece: &Piece, _board: &Board) -> Vec<Move> {
+        Vec::new()
+    }
+
+    pub fn rook(_piece: &Piece, _board: &Board) -> Vec<Move> {
+        Vec::new()
     }
 
     fn out_of_bounds(row: i32, col: i32) -> bool {
