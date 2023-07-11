@@ -17,7 +17,7 @@ pub enum Team {
     Black = 0b1000,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct Piece {
     piece_type: PieceType,
     team: Team,
@@ -49,6 +49,10 @@ impl Piece {
 
     pub fn get_index(&self) -> usize {
         self.index
+    }
+
+    pub fn update_index(&mut self, index: usize) {
+        self.index = index
     }
 
     pub fn team_from_value(value: u8) -> Team {

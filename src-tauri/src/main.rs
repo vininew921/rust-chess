@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 
-use rust_chess::game::{board::Board, piece::Piece};
+use rust_chess::game::{board::Board, moves::Move, piece::Piece};
 
 #[tauri::command]
 fn get_board(board: tauri::State<'_, MutexBoard>) -> Board {
@@ -20,6 +20,11 @@ fn get_piece(index: usize, board: tauri::State<'_, MutexBoard>) -> Option<Piece>
     board.0.lock().unwrap().get_piece(index).to_owned()
 }
 
+#[tauri::command]
+fn update_board(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
+    board.0.lock().unwrap().update(mv)
+}
+
 struct MutexBoard(Mutex<Board>);
 
 fn main() {
@@ -30,7 +35,12 @@ fn main() {
 
     tauri::Builder::default()
         .manage(MutexBoard(Mutex::from(board)))
-        .invoke_handler(tauri::generate_handler![get_board, get_position, get_piece,])
+        .invoke_handler(tauri::generate_handler![
+            get_board,
+            get_position,
+            get_piece,
+            update_board
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

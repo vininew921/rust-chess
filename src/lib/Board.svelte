@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
   import { svgFromPieceInfo } from "./utils";
-  import type { Board, Piece } from "./models";
+  import type { Board, Move, Piece } from "./models";
 
   const WIDTH = 600;
   const HEIGHT = 600;
@@ -15,23 +15,28 @@
   let board: Board;
   let gameCanvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
+  let selected_moves: Array<Move> | null;
 
   window.onload = async () => {
     board = await api_get_board();
     ctx = gameCanvas.getContext("2d");
-
-    render();
+    selected_moves = null;
 
     gameCanvas.onclick = handleClick;
+
+    render();
   };
 
-  const render = (piece: Piece | null = null) => {
+  const render = () => {
     drawGrid();
     drawPieces();
+    drawPieceMoves();
+  };
 
-    if (piece) {
-      drawPieceMoves(piece);
-    }
+  const move_piece = async (mv: Move) => {
+    board = await api_update_board(mv);
+    selected_moves = null;
+    render();
   };
 
   const api_get_board = async (): Promise<Board> => {
@@ -55,6 +60,15 @@
   const api_get_position = async (index: number): Promise<String> => {
     let result: String | null = null;
     await invoke("get_position", { index: index }).then((res: String) => {
+      result = res;
+    });
+
+    return result;
+  };
+
+  const api_update_board = async (mv: Move): Promise<Board> => {
+    let result: Board | null = null;
+    await invoke("update_board", { mv: mv }).then((res: Board) => {
       result = res;
     });
 
@@ -128,13 +142,13 @@
     }
   };
 
-  const drawPieceMoves = (piece: Piece) => {
-    let pieceMoves = board.available_moves.filter(
-      (mv) => mv.from == piece.index
-    );
+  const drawPieceMoves = () => {
+    if (!selected_moves) {
+      return;
+    }
 
-    for (let i = 0; i < pieceMoves.length; i++) {
-      let mv = pieceMoves[i];
+    for (let i = 0; i < selected_moves.length; i++) {
+      let mv = selected_moves[i];
 
       let [row, col] = get_row_col(mv.to);
 
@@ -149,8 +163,17 @@
         0,
         Math.PI * 2
       );
+
       ctx.fill();
     }
+  };
+
+  const get_piece_moves = (piece: Piece | null): Array<Move> | null => {
+    if (!piece || piece?.team != board.current_player) {
+      return null;
+    }
+
+    return board.available_moves.filter((mv) => mv.from == piece.index);
   };
 
   const get_row_col = (index: number): [number, number] => {
@@ -164,8 +187,8 @@
     return row * 8 + col;
   };
 
-  const index_from_mousepos = (x: number, y: number) => {
-    var rect = gameCanvas.getBoundingClientRect();
+  const get_index_from_mousepos = (x: number, y: number) => {
+    let rect = gameCanvas.getBoundingClientRect();
 
     let mouseX = x - rect.left;
     let mouseY = y - rect.top;
@@ -177,13 +200,22 @@
   };
 
   const handleClick = async (ev: MouseEvent) => {
-    let index = index_from_mousepos(ev.clientX, ev.clientY);
+    let index = get_index_from_mousepos(ev.clientX, ev.clientY);
+
+    let target_move: Move | undefined = selected_moves?.find(
+      (mv) => mv.to == index
+    );
+
+    if (target_move) {
+      move_piece(target_move);
+      return;
+    }
 
     let piece = await api_get_piece(index);
 
-    render(piece);
+    selected_moves = get_piece_moves(piece);
 
-    console.log(await api_get_position(index));
+    render();
   };
 </script>
 

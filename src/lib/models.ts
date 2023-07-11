@@ -16,6 +16,8 @@ export enum Team {
 export type Board = {
   pieces: Array<Piece | null>;
   available_moves: Array<Move>;
+  current_player: Team;
+  turn: number;
 };
 
 export type Piece = {

@@ -11,6 +11,8 @@ use super::{
 pub struct Board {
     pieces: Vec<Option<Piece>>,
     available_moves: Vec<Move>,
+    current_player: Team,
+    turn: u16,
 }
 
 //Starting board:
@@ -21,6 +23,8 @@ impl Board {
         let mut board = Board {
             pieces: vec![None; 64],
             available_moves: Vec::new(),
+            current_player: Team::White,
+            turn: 0,
         };
 
         let mut fen_chars: Vec<char> = vec!['.'; 64];
@@ -90,6 +94,28 @@ impl Board {
                 }
             }
         }
+    }
+
+    pub fn update(&mut self, mv: Move) -> Self {
+        let from_piece = self.get_piece(mv.from).unwrap();
+
+        if from_piece.get_team() != self.current_player {
+            return self.clone();
+        }
+
+        let new_piece = Piece::new(from_piece.get_piece_type(), from_piece.get_team(), mv.to);
+
+        self.pieces[mv.to] = Some(new_piece);
+        self.pieces[mv.from] = None;
+
+        self.generate_moves();
+
+        self.current_player = match self.current_player {
+            Team::White => Team::Black,
+            Team::Black => Team::White,
+        };
+
+        self.clone()
     }
 
     pub fn get_pieces(&self) -> Vec<Option<Piece>> {
