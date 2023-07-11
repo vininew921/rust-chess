@@ -10,7 +10,7 @@ use super::{
 #[derive(Clone, Serialize)]
 pub struct Board {
     pieces: Vec<Option<Piece>>,
-    avaliable_moves: Vec<Move>,
+    available_moves: Vec<Move>,
 }
 
 //Starting board:
@@ -20,7 +20,7 @@ impl Board {
     pub fn from_fen(fen_string: &str) -> Self {
         let mut board = Board {
             pieces: vec![None; 64],
-            avaliable_moves: Vec::new(),
+            available_moves: Vec::new(),
         };
 
         let mut fen_chars: Vec<char> = vec!['.'; 64];
@@ -71,7 +71,7 @@ impl Board {
     }
 
     pub fn generate_moves(&mut self) {
-        self.avaliable_moves.clear();
+        self.available_moves.clear();
 
         for i in 0..self.pieces.len() {
             if let Some(piece) = self.get_piece(i) {
@@ -86,7 +86,7 @@ impl Board {
                 };
 
                 for am in available_moves {
-                    self.avaliable_moves.push(am);
+                    self.available_moves.push(am);
                 }
             }
         }
@@ -101,7 +101,7 @@ impl Board {
     }
 
     pub fn get_piece_moves(&self, index: usize) -> Vec<Move> {
-        self.avaliable_moves
+        self.available_moves
             .iter()
             .filter(|&mov| mov.from == index)
             .cloned()

@@ -35,9 +35,6 @@ impl Move {
             }
 
             let target_index = Board::get_index(t_row as usize, t_col as usize);
-            if index == 1 {
-                println!(" target index: {}", target_index);
-            }
 
             if let Some(target_piece) = board.get_piece(target_index) {
                 if target_piece.get_team() == piece.get_team() {
@@ -76,9 +73,6 @@ impl Move {
             }
 
             let target_index = Board::get_index(t_row as usize, t_col as usize);
-            if index == 1 {
-                println!(" target index: {}", target_index);
-            }
 
             if let Some(target_piece) = board.get_piece(target_index) {
                 if target_piece.get_team() == piece.get_team() {

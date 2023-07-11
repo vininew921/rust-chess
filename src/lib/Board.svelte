@@ -1,13 +1,14 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
-  import type { Board, Move, Piece } from "./models";
   import { svgFromPieceInfo } from "./utils";
+  import type { Board, Piece } from "./models";
 
   const WIDTH = 600;
   const HEIGHT = 600;
   const BLACK_COLOR = "#053363";
   const WHITE_COLOR = "#0D698B";
   const COORD_COLOR = "#FFFFFF";
+  const MOVE_COLOR = "#4B2D0B";
   const CELL_SIZE = WIDTH / 8;
   const DEBUG_FLAG = true;
 
@@ -17,12 +18,20 @@
 
   window.onload = async () => {
     board = await api_get_board();
-    console.log(board);
     ctx = gameCanvas.getContext("2d");
+
+    render();
+
+    gameCanvas.onclick = handleClick;
+  };
+
+  const render = (piece: Piece | null = null) => {
     drawGrid();
     drawPieces();
 
-    gameCanvas.onclick = handleClick;
+    if (piece) {
+      drawPieceMoves(piece);
+    }
   };
 
   const api_get_board = async (): Promise<Board> => {
@@ -84,8 +93,8 @@
       ctx.fillStyle = COORD_COLOR;
       ctx.fillText(
         (8 - row).toString(),
-        col * CELL_SIZE + 1 + CELL_SIZE / 2,
-        row * CELL_SIZE + CELL_SIZE - 2
+        col * CELL_SIZE + 1,
+        row * CELL_SIZE + CELL_SIZE / 2
       );
     }
 
@@ -119,6 +128,38 @@
     }
   };
 
+  const drawPieceMoves = (piece: Piece) => {
+    let pieceMoves = board.available_moves.filter(
+      (mv) => mv.from == piece.index
+    );
+
+    for (let i = 0; i < pieceMoves.length; i++) {
+      let mv = pieceMoves[i];
+
+      let [row, col] = get_row_col(mv.to);
+
+      ctx.fillStyle = MOVE_COLOR;
+      ctx.beginPath();
+      ctx.ellipse(
+        col * CELL_SIZE + CELL_SIZE / 2,
+        row * CELL_SIZE + CELL_SIZE / 2,
+        CELL_SIZE / 5,
+        CELL_SIZE / 5,
+        0,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+  };
+
+  const get_row_col = (index: number): [number, number] => {
+    let row = Math.floor(index / 8);
+    let col = index % 8;
+
+    return [row, col];
+  };
+
   const get_index = (row: number, col: number): number => {
     return row * 8 + col;
   };
@@ -137,7 +178,11 @@
 
   const handleClick = async (ev: MouseEvent) => {
     let index = index_from_mousepos(ev.clientX, ev.clientY);
-    console.log(await api_get_piece(index));
+
+    let piece = await api_get_piece(index);
+
+    render(piece);
+
     console.log(await api_get_position(index));
   };
 </script>
