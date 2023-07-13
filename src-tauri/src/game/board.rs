@@ -24,7 +24,7 @@ impl Board {
             pieces: vec![None; 64],
             available_moves: Vec::new(),
             current_player: Team::White,
-            turn: 0,
+            turn: 1,
         };
 
         let mut fen_chars: Vec<char> = vec!['.'; 64];
@@ -97,11 +97,29 @@ impl Board {
     }
 
     pub fn update(&mut self, mv: Move) -> Self {
+        //Double checking if the move provided is actually one of the available moves
+        if !self
+            .available_moves
+            .iter()
+            .any(|x| x.from == mv.from && x.to == mv.to)
+        {
+            return self.clone();
+        }
+
         let from_piece = self.get_piece(mv.from).unwrap();
 
+        //Double checking if the move provided is actually from the current player
         if from_piece.get_team() != self.current_player {
             return self.clone();
         }
+
+        println!(
+            "MOVE -> Turn {}, {:?} | {} to {}",
+            self.turn,
+            self.current_player,
+            Board::coordinates_from_index(mv.from),
+            Board::coordinates_from_index(mv.to)
+        );
 
         let new_piece = Piece::new(from_piece.get_piece_type(), from_piece.get_team(), mv.to);
 
@@ -112,7 +130,10 @@ impl Board {
 
         self.current_player = match self.current_player {
             Team::White => Team::Black,
-            Team::Black => Team::White,
+            Team::Black => {
+                self.turn = self.turn + 1;
+                Team::White
+            }
         };
 
         self.clone()
