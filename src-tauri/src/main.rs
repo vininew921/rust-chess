@@ -25,6 +25,12 @@ fn update_board(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
     board.0.lock().unwrap().update(mv)
 }
 
+#[tauri::command]
+fn reset_board(board: tauri::State<'_, MutexBoard>) -> Board {
+    board.0.lock().unwrap().reset();
+    board.0.lock().unwrap().to_owned()
+}
+
 struct MutexBoard(Mutex<Board>);
 
 fn main() {
@@ -39,7 +45,8 @@ fn main() {
             get_board,
             get_position,
             get_piece,
-            update_board
+            update_board,
+            reset_board
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

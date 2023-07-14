@@ -9,6 +9,7 @@ use super::{
 
 #[derive(Clone, Serialize)]
 pub struct Board {
+    fen: String,
     pieces: Vec<Option<Piece>>,
     available_moves: Vec<Move>,
     current_player: Team,
@@ -21,16 +22,23 @@ pub struct Board {
 impl Board {
     pub fn from_fen(fen_string: &str) -> Self {
         let mut board = Board {
+            fen: String::from(fen_string),
             pieces: vec![None; 64],
             available_moves: Vec::new(),
             current_player: Team::White,
             turn: 1,
         };
 
+        board.initialize();
+        board.generate_moves();
+        board
+    }
+
+    fn initialize(&mut self) {
         let mut fen_chars: Vec<char> = vec!['.'; 64];
 
         let mut count = 0;
-        for ch in fen_string.chars() {
+        for ch in self.fen.chars() {
             if ch == '/' {
                 continue;
             }
@@ -52,7 +60,7 @@ impl Board {
         }
 
         for (i, ch) in fen_chars.iter().enumerate() {
-            board.pieces[i] = match ch {
+            self.pieces[i] = match ch {
                 'p' => Option::from(Piece::new(PieceType::Pawn, Team::Black, i)),
                 'P' => Option::from(Piece::new(PieceType::Pawn, Team::White, i)),
                 'r' => Option::from(Piece::new(PieceType::Rook, Team::Black, i)),
@@ -69,9 +77,17 @@ impl Board {
                 _ => panic!("Invalid FEN character: {}", ch),
             }
         }
+    }
 
-        board.generate_moves();
-        board
+    pub fn reset(&mut self) {
+        self.fen = String::from(self.fen.clone());
+        self.pieces = vec![None; 64];
+        self.available_moves = Vec::new();
+        self.current_player = Team::White;
+        self.turn = 1;
+
+        self.initialize();
+        self.generate_moves();
     }
 
     pub fn generate_moves(&mut self) {
