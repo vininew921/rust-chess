@@ -26,9 +26,8 @@ fn update_board(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
 }
 
 #[tauri::command]
-fn reset_board(board: tauri::State<'_, MutexBoard>) -> Board {
+fn reset_board(board: tauri::State<'_, MutexBoard>) {
     board.0.lock().unwrap().reset();
-    board.0.lock().unwrap().to_owned()
 }
 
 struct MutexBoard(Mutex<Board>);

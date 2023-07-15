@@ -84,6 +84,8 @@ impl Board {
     }
 
     pub fn reset(&mut self) {
+        println!("Reseting board...");
+
         self.fen = String::from(self.fen.clone());
         self.pieces = vec![None; 64];
         self.available_moves = Vec::new();
@@ -94,6 +96,8 @@ impl Board {
 
         self.initialize();
         self.generate_moves();
+
+        println!("Done!");
     }
 
     pub fn generate_moves(&mut self) {

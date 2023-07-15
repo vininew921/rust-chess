@@ -23,7 +23,14 @@
     selected_moves = null;
 
     gameCanvas.onclick = handleClick;
+    gameCanvas.onselectstart = () => false;
 
+    render();
+  };
+
+  export const reset_board = async () => {
+    await api_reset_board();
+    board = await api_get_board();
     render();
   };
 
@@ -64,6 +71,10 @@
     });
 
     return result;
+  };
+
+  const api_reset_board = async () => {
+    await invoke("reset_board");
   };
 
   const api_update_board = async (mv: Move): Promise<Board> => {
