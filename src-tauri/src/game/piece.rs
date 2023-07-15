@@ -21,8 +21,9 @@ pub enum Team {
 pub struct Piece {
     piece_type: PieceType,
     team: Team,
-    value: u8,
     index: usize,
+    value: u8,
+    moved: bool,
 }
 
 impl Piece {
@@ -30,9 +31,18 @@ impl Piece {
         Piece {
             piece_type,
             team,
-            value: piece_type as u8 | team as u8,
             index,
+            value: piece_type as u8 | team as u8,
+            moved: false,
         }
+    }
+
+    pub fn moved(&mut self, moved: bool) {
+        self.moved = moved;
+    }
+
+    pub fn has_moved(&self) -> bool {
+        self.moved
     }
 
     pub fn get_value(&self) -> u8 {

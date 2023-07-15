@@ -14,6 +14,8 @@ pub struct Board {
     available_moves: Vec<Move>,
     current_player: Team,
     turn: u16,
+    en_passant: bool,
+    last_moved_piece: usize,
 }
 
 //Starting board:
@@ -27,6 +29,8 @@ impl Board {
             available_moves: Vec::new(),
             current_player: Team::White,
             turn: 1,
+            en_passant: false,
+            last_moved_piece: 0,
         };
 
         board.initialize();
@@ -85,6 +89,8 @@ impl Board {
         self.available_moves = Vec::new();
         self.current_player = Team::White;
         self.turn = 1;
+        self.last_moved_piece = 0;
+        self.en_passant = false;
 
         self.initialize();
         self.generate_moves();
@@ -117,7 +123,7 @@ impl Board {
         if !self
             .available_moves
             .iter()
-            .any(|x| x.from == mv.from && x.to == mv.to)
+            .any(|x| x.from == mv.from && x.to == mv.to && x.en_passant == mv.en_passant)
         {
             return self.clone();
         }
@@ -137,10 +143,27 @@ impl Board {
             Board::coordinates_from_index(mv.to)
         );
 
-        let new_piece = Piece::new(from_piece.get_piece_type(), from_piece.get_team(), mv.to);
+        let mut new_piece = Piece::new(from_piece.get_piece_type(), from_piece.get_team(), mv.to);
+        new_piece.moved(true);
 
         self.pieces[mv.to] = Some(new_piece);
         self.pieces[mv.from] = None;
+
+        //Capture the last moved piece if the current move is an en passant
+        if mv.en_passant {
+            self.pieces[self.last_moved_piece] = None;
+        }
+
+        self.en_passant = false;
+
+        //Check if an en passant is possible on the next turn
+        if from_piece.get_piece_type() == PieceType::Pawn {
+            if i8::abs(mv.to as i8 - mv.from as i8) == 16 {
+                self.en_passant = true;
+            }
+        }
+
+        self.last_moved_piece = mv.to;
 
         self.generate_moves();
 
@@ -161,6 +184,14 @@ impl Board {
 
     pub fn get_piece(&self, index: usize) -> &Option<Piece> {
         self.pieces.index(index)
+    }
+
+    pub fn en_passant_possible(&self) -> bool {
+        self.en_passant
+    }
+
+    pub fn get_last_move(&self) -> usize {
+        self.last_moved_piece
     }
 
     pub fn get_piece_moves(&self, index: usize) -> Vec<Move> {

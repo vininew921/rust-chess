@@ -18,6 +18,8 @@ export type Board = {
   available_moves: Array<Move>;
   current_player: Team;
   turn: number;
+  en_passant: boolean;
+  last_moved_piece: number;
 };
 
 export type Piece = {
@@ -30,4 +32,5 @@ export type Piece = {
 export type Move = {
   from: number;
   to: number;
+  en_passant: boolean;
 };
