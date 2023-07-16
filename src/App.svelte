@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/tauri";
   import Board from "./lib/Board.svelte";
 
   let boardComponent: Board;

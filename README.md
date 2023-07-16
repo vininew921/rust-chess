@@ -2,11 +2,15 @@
 
 Implemented using the Tauri framework (Rust + Svelte).
 
+## Development Prerequisites
+
+To run this in development mode, you need to follow all the prerequisites described in the [Tauri Getting Started | Prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites) page.
+
 ## Running
 
 Run the following commands on the root folder of the cloned project:
 
-Build:
+Install dependencies:
 
     yarn
 

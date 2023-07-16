@@ -1,7 +1,17 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/tauri";
-  import { svgFromPieceInfo } from "./utils";
+  import {
+    charFromCol,
+    get_index,
+    get_row_col,
+    svgFromPieceInfo,
+  } from "./utils";
   import type { Board, Move, Piece } from "./models";
+  import {
+    api_get_board,
+    api_get_piece,
+    api_reset_board,
+    api_update_board,
+  } from "./api";
 
   const WIDTH = 600;
   const HEIGHT = 600;
@@ -34,10 +44,43 @@
     render();
   };
 
-  const render = () => {
-    drawGrid();
-    drawPieces();
-    drawPieceMoves();
+  const get_piece_moves = (piece: Piece | null): Array<Move> | null => {
+    if (!piece || piece?.team != board.current_player) {
+      return null;
+    }
+
+    return board.available_moves.filter((mv) => mv.from == piece.index);
+  };
+
+  const get_index_from_mousepos = (x: number, y: number) => {
+    let rect = gameCanvas.getBoundingClientRect();
+
+    let mouseX = x - rect.left;
+    let mouseY = y - rect.top;
+
+    let indexX = Math.floor(mouseX / (WIDTH / 8));
+    let indexY = Math.floor(mouseY / (HEIGHT / 8));
+
+    return get_index(indexY, indexX);
+  };
+
+  const handleClick = async (ev: MouseEvent) => {
+    let index = get_index_from_mousepos(ev.clientX, ev.clientY);
+
+    let target_move: Move | undefined = selected_moves?.find(
+      (mv) => mv.to == index
+    );
+
+    if (target_move) {
+      move_piece(target_move);
+      return;
+    }
+
+    let piece = await api_get_piece(index);
+
+    selected_moves = get_piece_moves(piece);
+
+    render();
   };
 
   const move_piece = async (mv: Move) => {
@@ -46,48 +89,10 @@
     render();
   };
 
-  const api_get_board = async (): Promise<Board> => {
-    let result: Board;
-    await invoke("get_board").then((res: Board) => {
-      result = res;
-    });
-
-    return result;
-  };
-
-  const api_get_piece = async (index: number): Promise<Piece | null> => {
-    let result: Piece | null = null;
-    await invoke("get_piece", { index: index }).then(
-      (res: Piece | null) => (result = res)
-    );
-
-    return result;
-  };
-
-  const api_get_position = async (index: number): Promise<String> => {
-    let result: String | null = null;
-    await invoke("get_position", { index: index }).then((res: String) => {
-      result = res;
-    });
-
-    return result;
-  };
-
-  const api_reset_board = async () => {
-    await invoke("reset_board");
-  };
-
-  const api_update_board = async (mv: Move): Promise<Board> => {
-    let result: Board | null = null;
-    await invoke("update_board", { mv: mv }).then((res: Board) => {
-      result = res;
-    });
-
-    return result;
-  };
-
-  const charFromCol = (col: number): string => {
-    return String.fromCharCode("A".charCodeAt(0) + col);
+  const render = () => {
+    drawGrid();
+    drawPieces();
+    drawPieceMoves();
   };
 
   const drawGrid = () => {
@@ -177,56 +182,6 @@
 
       ctx.fill();
     }
-  };
-
-  const get_piece_moves = (piece: Piece | null): Array<Move> | null => {
-    if (!piece || piece?.team != board.current_player) {
-      return null;
-    }
-
-    return board.available_moves.filter((mv) => mv.from == piece.index);
-  };
-
-  const get_row_col = (index: number): [number, number] => {
-    let row = Math.floor(index / 8);
-    let col = index % 8;
-
-    return [row, col];
-  };
-
-  const get_index = (row: number, col: number): number => {
-    return row * 8 + col;
-  };
-
-  const get_index_from_mousepos = (x: number, y: number) => {
-    let rect = gameCanvas.getBoundingClientRect();
-
-    let mouseX = x - rect.left;
-    let mouseY = y - rect.top;
-
-    let indexX = Math.floor(mouseX / (WIDTH / 8));
-    let indexY = Math.floor(mouseY / (HEIGHT / 8));
-
-    return get_index(indexY, indexX);
-  };
-
-  const handleClick = async (ev: MouseEvent) => {
-    let index = get_index_from_mousepos(ev.clientX, ev.clientY);
-
-    let target_move: Move | undefined = selected_moves?.find(
-      (mv) => mv.to == index
-    );
-
-    if (target_move) {
-      move_piece(target_move);
-      return;
-    }
-
-    let piece = await api_get_piece(index);
-
-    selected_moves = get_piece_moves(piece);
-
-    render();
   };
 </script>
 
