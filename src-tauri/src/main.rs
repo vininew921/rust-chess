@@ -33,8 +33,11 @@ fn reset_board(board: tauri::State<'_, MutexBoard>) {
 struct MutexBoard(Mutex<Board>);
 
 fn main() {
+    tracing_subscriber::fmt().pretty().init();
+
     let fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-    println!("Initializing with FEN: {}", fen_string);
+
+    tracing::info!("Initializing with FEN: {}", fen_string);
 
     let board = Board::from_fen(fen_string);
 

@@ -84,7 +84,7 @@ impl Board {
     }
 
     pub fn reset(&mut self) {
-        println!("Reseting board...");
+        tracing::info!("Reseting board...");
 
         self.fen = String::from(self.fen.clone());
         self.pieces = vec![None; 64];
@@ -97,7 +97,7 @@ impl Board {
         self.initialize();
         self.generate_moves();
 
-        println!("Done!");
+        tracing::info!("Finished reseting board");
     }
 
     pub fn generate_moves(&mut self) {
@@ -139,7 +139,7 @@ impl Board {
             return self.clone();
         }
 
-        println!(
+        tracing::info!(
             "MOVE -> Turn {}, {:?} | {} to {}",
             self.turn,
             self.current_player,
