@@ -187,8 +187,108 @@ impl Move {
         Vec::new()
     }
 
-    pub fn rook(_piece: &Piece, _board: &Board) -> Vec<Move> {
-        Vec::new()
+    pub fn rook(piece: &Piece, board: &Board) -> Vec<Move> {
+        let mut result: Vec<Move> = Vec::new();
+
+        let index = piece.get_index();
+        let (row, col) = Board::get_row_col(index as i32);
+
+        //Rows above
+        for t_row in (0..(row)).rev() {
+            let mut stop = false;
+            let target_index = Board::get_index(t_row as usize, col as usize);
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                stop = true;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+
+            if stop {
+                break;
+            }
+        }
+
+        //Rows below
+        for t_row in (row + 1)..8 {
+            let mut stop = false;
+            let target_index = Board::get_index(t_row as usize, col as usize);
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                stop = true;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+
+            if stop {
+                break;
+            }
+        }
+
+        //Cols to the left
+        for t_col in (0..(col)).rev() {
+            let mut stop = false;
+            let target_index = Board::get_index(row as usize, t_col as usize);
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                stop = true;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+
+            if stop {
+                break;
+            }
+        }
+
+        //Cols to the right
+        for t_col in (col + 1)..8 {
+            let mut stop = false;
+            let target_index = Board::get_index(row as usize, t_col as usize);
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                stop = true;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+
+            if stop {
+                break;
+            }
+        }
+        result
     }
 
     fn out_of_bounds(row: i32, col: i32) -> bool {
