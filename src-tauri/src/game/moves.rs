@@ -13,8 +13,124 @@ pub struct Move {
 }
 
 impl Move {
-    pub fn bishop(_piece: &Piece, _board: &Board) -> Vec<Move> {
-        Vec::new()
+    pub fn bishop(piece: &Piece, board: &Board) -> Vec<Move> {
+        let mut result: Vec<Move> = Vec::new();
+        let index = piece.get_index();
+        let (row, col) = Board::get_row_col(index as i32);
+
+        //Left-up diagonal
+        let (mut t_row, mut t_col) = (row - 1, col - 1);
+        while !Move::out_of_bounds(t_row, t_col) {
+            let target_index = Board::get_index(t_row as usize, t_col as usize);
+
+            t_row -= 1;
+            t_col -= 1;
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                result.push(Move {
+                    from: index,
+                    to: target_index,
+                    en_passant: false,
+                });
+                break;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+        }
+
+        //Right-up diagonal
+        let (mut t_row, mut t_col) = (row - 1, col + 1);
+        while !Move::out_of_bounds(t_row, t_col) {
+            let target_index = Board::get_index(t_row as usize, t_col as usize);
+
+            t_row -= 1;
+            t_col += 1;
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                result.push(Move {
+                    from: index,
+                    to: target_index,
+                    en_passant: false,
+                });
+                break;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+        }
+
+        //Left-down diagonal
+        let (mut t_row, mut t_col) = (row + 1, col - 1);
+        while !Move::out_of_bounds(t_row, t_col) {
+            let target_index = Board::get_index(t_row as usize, t_col as usize);
+
+            t_row += 1;
+            t_col -= 1;
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                result.push(Move {
+                    from: index,
+                    to: target_index,
+                    en_passant: false,
+                });
+                break;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+        }
+
+        //Right-down diagonal
+        let (mut t_row, mut t_col) = (row + 1, col + 1);
+        while !Move::out_of_bounds(t_row, t_col) {
+            let target_index = Board::get_index(t_row as usize, t_col as usize);
+
+            t_row += 1;
+            t_col += 1;
+
+            if let Some(target_piece) = board.get_piece(target_index) {
+                if target_piece.get_team() == piece.get_team() {
+                    break;
+                }
+
+                result.push(Move {
+                    from: index,
+                    to: target_index,
+                    en_passant: false,
+                });
+                break;
+            }
+
+            result.push(Move {
+                from: index,
+                to: target_index,
+                en_passant: false,
+            });
+        }
+
+        result
     }
 
     pub fn king(piece: &Piece, board: &Board) -> Vec<Move> {
