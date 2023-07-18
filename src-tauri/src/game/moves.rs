@@ -299,8 +299,18 @@ impl Move {
         result
     }
 
-    pub fn queen(_piece: &Piece, _board: &Board) -> Vec<Move> {
-        Vec::new()
+    pub fn queen(piece: &Piece, board: &Board) -> Vec<Move> {
+        let mut result: Vec<Move> = Vec::new();
+
+        for mv in Move::rook(piece, board) {
+            result.push(mv);
+        }
+
+        for mv in Move::bishop(piece, board) {
+            result.push(mv);
+        }
+
+        result
     }
 
     pub fn rook(piece: &Piece, board: &Board) -> Vec<Move> {
