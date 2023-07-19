@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::{ops::Index, time::Instant};
 
 use serde::Serialize;
 use tracing::info;
@@ -96,6 +96,7 @@ impl Board {
         self.en_passant = false;
 
         self.initialize();
+
         self.generate_moves(false);
 
         tracing::info!("Finished reseting board");
@@ -114,6 +115,7 @@ impl Board {
     }
 
     pub fn generate_moves(&mut self, simulating_moves: bool) {
+        let mv_gen_time = Instant::now();
         self.available_moves.clear();
 
         for i in 0..self.pieces.len() {
@@ -152,9 +154,10 @@ impl Board {
 
         if !simulating_moves {
             info!(
-                "{:?}: {} legal moves found",
+                "{:?}: {} legal moves found in {:.2?}",
                 self.get_current_team(),
-                self.available_moves.len()
+                self.available_moves.len(),
+                mv_gen_time.elapsed(),
             )
         }
     }
