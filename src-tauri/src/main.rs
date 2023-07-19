@@ -12,7 +12,7 @@ fn get_board(board: tauri::State<'_, MutexBoard>) -> Board {
 
 #[tauri::command]
 fn get_position(index: usize) -> String {
-    Board::coordinates_from_index(index)
+    Board::get_coordinates_from_index(index)
 }
 
 #[tauri::command]
@@ -22,7 +22,8 @@ fn get_piece(index: usize, board: tauri::State<'_, MutexBoard>) -> Option<Piece>
 
 #[tauri::command]
 fn update_board(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
-    board.0.lock().unwrap().update(mv)
+    board.0.lock().unwrap().update(mv, false);
+    board.0.lock().unwrap().to_owned()
 }
 
 #[tauri::command]

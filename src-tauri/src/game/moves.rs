@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     board::Board,
-    piece::{Piece, Team},
+    piece::{Piece, PieceType, Team},
 };
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -415,6 +415,20 @@ impl Move {
             }
         }
         result
+    }
+
+    pub fn possible_mate(mv: Move, mut cloned_board: Board) -> bool {
+        cloned_board.update(mv, true);
+
+        //If the king would be in check after the move,
+        //return true so the move can be filtered out
+        for mv in cloned_board.get_possible_moves() {
+            if cloned_board.get_piece_type_by_index(mv.to) == PieceType::King {
+                return true;
+            }
+        }
+
+        false
     }
 
     fn out_of_bounds(row: i32, col: i32) -> bool {

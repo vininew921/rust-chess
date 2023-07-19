@@ -1,6 +1,7 @@
 use std::ops::Index;
 
 use serde::Serialize;
+use tracing::info;
 
 use super::{
     moves::Move,
@@ -34,7 +35,7 @@ impl Board {
         };
 
         board.initialize();
-        board.generate_moves();
+        board.generate_moves(false);
         board
     }
 
@@ -95,16 +96,32 @@ impl Board {
         self.en_passant = false;
 
         self.initialize();
-        self.generate_moves();
+        self.generate_moves(false);
 
         tracing::info!("Finished reseting board");
     }
 
-    pub fn generate_moves(&mut self) {
+    pub fn clone(&self) -> Self {
+        Self {
+            fen: self.fen.clone(),
+            pieces: self.pieces.to_vec(),
+            available_moves: self.available_moves.to_vec(),
+            current_player: self.current_player,
+            turn: self.turn,
+            en_passant: self.en_passant,
+            last_moved_piece: self.last_moved_piece,
+        }
+    }
+
+    pub fn generate_moves(&mut self, simulating_moves: bool) {
         self.available_moves.clear();
 
         for i in 0..self.pieces.len() {
             if let Some(piece) = self.get_piece(i) {
+                if piece.get_team() != self.current_player {
+                    continue;
+                }
+
                 let available_moves = match piece.get_piece_type() {
                     PieceType::Bishop => Move::bishop(piece, self),
                     PieceType::King => Move::king(piece, self),
@@ -120,32 +137,54 @@ impl Board {
                 }
             }
         }
+
+        let mut filtered_moves: Vec<Move> = Vec::new();
+
+        for um in self.available_moves.to_vec() {
+            if !simulating_moves && Move::possible_mate(um, self.clone()) {
+                continue;
+            }
+
+            filtered_moves.push(um);
+        }
+
+        self.available_moves.clone_from(&filtered_moves);
+
+        if !simulating_moves {
+            info!(
+                "{:?}: {} legal moves found",
+                self.get_current_team(),
+                self.available_moves.len()
+            )
+        }
     }
 
-    pub fn update(&mut self, mv: Move) -> Self {
+    pub fn update(&mut self, mv: Move, simulating_move: bool) {
         //Double checking if the move provided is actually one of the available moves
         if !self
             .available_moves
             .iter()
             .any(|x| x.from == mv.from && x.to == mv.to && x.en_passant == mv.en_passant)
         {
-            return self.clone();
+            return;
         }
 
         let from_piece = self.get_piece(mv.from).unwrap();
 
         //Double checking if the move provided is actually from the current player
         if from_piece.get_team() != self.current_player {
-            return self.clone();
+            return;
         }
 
-        tracing::info!(
-            "MOVE -> Turn {}, {:?} | {} to {}",
-            self.turn,
-            self.current_player,
-            Board::coordinates_from_index(mv.from),
-            Board::coordinates_from_index(mv.to)
-        );
+        if !simulating_move {
+            tracing::info!(
+                "MOVE -> Turn {}, {:?} | {} to {}",
+                self.turn,
+                self.current_player,
+                Board::get_coordinates_from_index(mv.from),
+                Board::get_coordinates_from_index(mv.to)
+            );
+        }
 
         let mut new_piece = Piece::new(from_piece.get_piece_type(), from_piece.get_team(), mv.to);
         new_piece.moved(true);
@@ -169,8 +208,6 @@ impl Board {
 
         self.last_moved_piece = mv.to;
 
-        self.generate_moves();
-
         self.current_player = match self.current_player {
             Team::White => Team::Black,
             Team::Black => {
@@ -179,7 +216,11 @@ impl Board {
             }
         };
 
-        self.clone()
+        self.generate_moves(simulating_move);
+    }
+
+    pub fn en_passant_possible(&self) -> bool {
+        self.en_passant
     }
 
     pub fn get_pieces(&self) -> Vec<Option<Piece>> {
@@ -190,8 +231,12 @@ impl Board {
         self.pieces.index(index)
     }
 
-    pub fn en_passant_possible(&self) -> bool {
-        self.en_passant
+    pub fn get_piece_type_by_index(&self, index: usize) -> PieceType {
+        if let Some(p) = self.get_piece(index) {
+            return p.get_piece_type();
+        }
+
+        PieceType::Empty
     }
 
     pub fn get_last_move(&self) -> usize {
@@ -206,18 +251,12 @@ impl Board {
             .collect()
     }
 
-    pub fn print(&self) {
-        for i in 0..64 {
-            let piece = self.get_piece(i);
-            match piece {
-                Some(x) => print!("{:?}->{:?} ", x.get_team(), x.get_piece_type()),
-                _ => print!("{:?} ", PieceType::Empty),
-            }
+    pub fn get_current_team(&self) -> Team {
+        self.current_player
+    }
 
-            if (i + 1) % 8 == 0 {
-                println!("");
-            }
-        }
+    pub fn get_possible_moves(&self) -> &Vec<Move> {
+        &self.available_moves
     }
 
     pub fn get_index(row: usize, col: usize) -> usize {
@@ -231,7 +270,7 @@ impl Board {
         (row, col)
     }
 
-    pub fn coordinates_from_index(index: usize) -> String {
+    pub fn get_coordinates_from_index(index: usize) -> String {
         let (row, col) = Board::get_row_col(index as i32);
 
         let col_str = (8 - row).to_string();
@@ -240,5 +279,19 @@ impl Board {
         let result = format!("{}{}", row_str, col_str);
 
         result
+    }
+
+    pub fn print(&self) {
+        for i in 0..64 {
+            let piece = self.get_piece(i);
+            match piece {
+                Some(x) => print!("{:?}->{:?} ", x.get_team(), x.get_piece_type()),
+                _ => print!("{:?} ", PieceType::Empty),
+            }
+
+            if (i + 1) % 8 == 0 {
+                println!("");
+            }
+        }
     }
 }
