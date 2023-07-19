@@ -20,6 +20,7 @@ export type Board = {
   turn: number;
   en_passant: boolean;
   last_moved_piece: number;
+  mate: boolean;
 };
 
 export type Piece = {

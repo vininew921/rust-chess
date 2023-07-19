@@ -17,6 +17,7 @@ pub struct Board {
     turn: u16,
     en_passant: bool,
     last_moved_piece: usize,
+    mate: bool,
 }
 
 //Starting board:
@@ -32,6 +33,7 @@ impl Board {
             turn: 1,
             en_passant: false,
             last_moved_piece: 0,
+            mate: false,
         };
 
         board.initialize();
@@ -111,6 +113,7 @@ impl Board {
             turn: self.turn,
             en_passant: self.en_passant,
             last_moved_piece: self.last_moved_piece,
+            mate: self.mate,
         }
     }
 
@@ -142,12 +145,12 @@ impl Board {
 
         let mut filtered_moves: Vec<Move> = Vec::new();
 
-        for um in self.available_moves.to_vec() {
-            if !simulating_moves && Move::possible_mate(um, self.clone()) {
+        for am in self.available_moves.to_vec() {
+            if !simulating_moves && Move::possible_mate(am, self.clone()) {
                 continue;
             }
 
-            filtered_moves.push(um);
+            filtered_moves.push(am);
         }
 
         self.available_moves.clone_from(&filtered_moves);
@@ -158,7 +161,11 @@ impl Board {
                 self.get_current_team(),
                 self.available_moves.len(),
                 mv_gen_time.elapsed(),
-            )
+            );
+
+            if self.available_moves.len() == 0 {
+                self.mate = true;
+            }
         }
     }
 
@@ -220,6 +227,21 @@ impl Board {
         };
 
         self.generate_moves(simulating_move);
+    }
+
+    pub fn get_is_check(&mut self) -> bool {
+        let mut cloned_board = self.clone();
+        cloned_board.current_player = match cloned_board.current_player {
+            Team::Black => Team::White,
+            Team::White => Team::Black,
+        };
+
+        cloned_board.generate_moves(true);
+
+        cloned_board
+            .available_moves
+            .iter()
+            .any(|mv| cloned_board.get_piece_type_by_index(mv.to) == PieceType::King)
     }
 
     pub fn en_passant_possible(&self) -> bool {

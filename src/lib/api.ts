@@ -28,6 +28,15 @@ export const api_get_position = async (index: number): Promise<String> => {
   return result;
 };
 
+export const api_get_is_check = async (): Promise<boolean> => {
+  let result: boolean | null = null;
+  await invoke("get_is_check").then((res: boolean) => {
+    result = res;
+  });
+
+  return result;
+};
+
 export const api_reset_board = async () => {
   await invoke("reset_board");
 };

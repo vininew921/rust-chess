@@ -1,6 +1,8 @@
 use serde::Serialize;
+use serde_repr::Serialize_repr;
 
-#[derive(Debug, Clone, Copy, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize_repr, PartialEq)]
+#[repr(u8)]
 pub enum PieceType {
     Empty = 0,
     Pawn = 0b0001,

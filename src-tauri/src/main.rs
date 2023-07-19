@@ -21,6 +21,11 @@ fn get_piece(index: usize, board: tauri::State<'_, MutexBoard>) -> Option<Piece>
 }
 
 #[tauri::command]
+fn get_is_check(board: tauri::State<'_, MutexBoard>) -> bool {
+    board.0.lock().unwrap().get_is_check()
+}
+
+#[tauri::command]
 fn update_board(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
     board.0.lock().unwrap().update(mv, false);
     board.0.lock().unwrap().to_owned()
@@ -48,6 +53,7 @@ fn main() {
             get_board,
             get_position,
             get_piece,
+            get_is_check,
             update_board,
             reset_board
         ])
