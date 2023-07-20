@@ -17,6 +17,7 @@ pub struct Board {
     turn: u16,
     en_passant: bool,
     last_moved_piece: usize,
+    check: bool,
     mate: bool,
 }
 
@@ -33,6 +34,7 @@ impl Board {
             turn: 1,
             en_passant: false,
             last_moved_piece: 0,
+            check: false,
             mate: false,
         };
 
@@ -113,6 +115,7 @@ impl Board {
             turn: self.turn,
             en_passant: self.en_passant,
             last_moved_piece: self.last_moved_piece,
+            check: self.check,
             mate: self.mate,
         }
     }
@@ -166,6 +169,8 @@ impl Board {
             if self.available_moves.len() == 0 {
                 self.mate = true;
             }
+
+            self.check = self.get_is_check();
         }
     }
 

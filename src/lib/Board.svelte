@@ -8,7 +8,6 @@
   import { PieceType, type Board, type Move, type Piece } from "./models";
   import {
     api_get_board,
-    api_get_is_check,
     api_get_piece,
     api_reset_board,
     api_update_board,
@@ -30,7 +29,6 @@
   const AUDIO_PROMOTE = new Audio("sounds/promote.mp3");
 
   let board: Board;
-  let board_check: boolean;
   let gameCanvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
   let selected_moves: Array<Move> | null;
@@ -106,9 +104,8 @@
     let source_piece_type = board.pieces[mv.from].piece_type;
 
     board = await api_update_board(mv);
-    board_check = await api_get_is_check();
 
-    if (board_check) {
+    if (board.check) {
       AUDIO_MOVE_CHECK.play();
     } else if (target_square && target_square.piece_type != PieceType.Empty) {
       AUDIO_CAPTURE.play();
