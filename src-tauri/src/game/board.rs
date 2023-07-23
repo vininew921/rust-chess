@@ -106,20 +106,6 @@ impl Board {
         tracing::info!("Finished reseting board");
     }
 
-    pub fn clone(&self) -> Self {
-        Self {
-            fen: self.fen.clone(),
-            pieces: self.pieces.to_vec(),
-            available_moves: self.available_moves.to_vec(),
-            current_player: self.current_player,
-            turn: self.turn,
-            en_passant: self.en_passant,
-            last_moved_piece: self.last_moved_piece,
-            check: self.check,
-            mate: self.mate,
-        }
-    }
-
     pub fn generate_moves(&mut self, simulating_moves: bool) {
         let mv_gen_time = Instant::now();
         self.available_moves.clear();
