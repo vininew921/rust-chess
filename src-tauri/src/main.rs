@@ -21,8 +21,8 @@ fn get_piece(index: usize, board: tauri::State<'_, MutexBoard>) -> Option<Piece>
 }
 
 #[tauri::command]
-fn update_board(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
-    board.0.lock().unwrap().update(mv, false);
+fn make_move(mv: Move, board: tauri::State<'_, MutexBoard>) -> Board {
+    board.0.lock().unwrap().make_move(mv, false);
     board.0.lock().unwrap().to_owned()
 }
 
@@ -48,7 +48,7 @@ fn main() {
             get_board,
             get_position,
             get_piece,
-            update_board,
+            make_move,
             reset_board
         ])
         .run(tauri::generate_context!())

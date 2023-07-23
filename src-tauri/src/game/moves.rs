@@ -418,7 +418,7 @@ impl Move {
     }
 
     pub fn possible_mate(mv: Move, mut cloned_board: Board) -> bool {
-        cloned_board.update(mv, true);
+        cloned_board.make_move(mv, true);
 
         //If the king would be in check after the move,
         //return true so the move can be filtered out

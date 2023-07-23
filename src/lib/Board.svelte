@@ -10,7 +10,7 @@
     api_get_board,
     api_get_piece,
     api_reset_board,
-    api_update_board,
+    api_make_move,
   } from "./api";
 
   const WIDTH = 600;
@@ -103,7 +103,7 @@
     let target_square = board.pieces[mv.to];
     let source_piece_type = board.pieces[mv.from].piece_type;
 
-    board = await api_update_board(mv);
+    board = await api_make_move(mv);
 
     if (board.check) {
       AUDIO_MOVE_CHECK.play();

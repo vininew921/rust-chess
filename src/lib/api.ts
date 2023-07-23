@@ -32,9 +32,9 @@ export const api_reset_board = async () => {
   await invoke("reset_board");
 };
 
-export const api_update_board = async (mv: Move): Promise<Board> => {
+export const api_make_move = async (mv: Move): Promise<Board> => {
   let result: Board | null = null;
-  await invoke("update_board", { mv: mv }).then((res: Board) => {
+  await invoke("make_move", { mv: mv }).then((res: Board) => {
     result = res;
   });
 

@@ -106,7 +106,7 @@ impl Board {
         tracing::info!("Finished reseting board");
     }
 
-    pub fn generate_moves(&mut self, simulating_moves: bool) {
+    pub fn generate_moves(&mut self, simulation: bool) {
         let mv_gen_time = Instant::now();
         self.available_moves.clear();
 
@@ -135,7 +135,7 @@ impl Board {
         let mut filtered_moves: Vec<Move> = Vec::new();
 
         for am in self.available_moves.to_vec() {
-            if !simulating_moves && Move::possible_mate(am, self.clone()) {
+            if !simulation && Move::possible_mate(am, self.clone()) {
                 continue;
             }
 
@@ -144,7 +144,7 @@ impl Board {
 
         self.available_moves.clone_from(&filtered_moves);
 
-        if !simulating_moves {
+        if !simulation {
             info!(
                 "{:?}: {} legal moves found in {:.2?}",
                 self.get_current_team(),
@@ -160,7 +160,7 @@ impl Board {
         }
     }
 
-    pub fn update(&mut self, mv: Move, simulating_move: bool) {
+    pub fn make_move(&mut self, mv: Move, simulation: bool) {
         //Double checking if the move provided is actually one of the available moves
         if !self
             .available_moves
@@ -177,7 +177,7 @@ impl Board {
             return;
         }
 
-        if !simulating_move {
+        if !simulation {
             tracing::info!(
                 "MOVE -> Turn {}, {:?} | {} to {}",
                 self.turn,
@@ -217,7 +217,7 @@ impl Board {
             }
         };
 
-        self.generate_moves(simulating_move);
+        self.generate_moves(simulation);
     }
 
     pub fn get_is_check(&mut self) -> bool {
