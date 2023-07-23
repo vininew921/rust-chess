@@ -10,6 +10,36 @@ pub struct Move {
     pub from: usize,
     pub to: usize,
     pub en_passant: bool,
+    pub promotion_piece: Option<PieceType>,
+}
+
+impl Move {
+    pub fn basic(from: usize, to: usize) -> Self {
+        Move {
+            from: from,
+            to: to,
+            en_passant: false,
+            promotion_piece: None,
+        }
+    }
+
+    pub fn en_passant(from: usize, to: usize) -> Self {
+        Move {
+            from: from,
+            to: to,
+            en_passant: true,
+            promotion_piece: None,
+        }
+    }
+
+    pub fn promotion(from: usize, to: usize, promotion_piece: PieceType) -> Self {
+        Move {
+            from: from,
+            to: to,
+            en_passant: false,
+            promotion_piece: Some(promotion_piece),
+        }
+    }
 }
 
 impl Move {
@@ -31,19 +61,11 @@ impl Move {
                     break;
                 }
 
-                result.push(Move {
-                    from: index,
-                    to: target_index,
-                    en_passant: false,
-                });
+                result.push(Move::basic(index, target_index));
                 break;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         //Right-up diagonal
@@ -59,19 +81,11 @@ impl Move {
                     break;
                 }
 
-                result.push(Move {
-                    from: index,
-                    to: target_index,
-                    en_passant: false,
-                });
+                result.push(Move::basic(index, target_index));
                 break;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         //Left-down diagonal
@@ -87,19 +101,11 @@ impl Move {
                     break;
                 }
 
-                result.push(Move {
-                    from: index,
-                    to: target_index,
-                    en_passant: false,
-                });
+                result.push(Move::basic(index, target_index));
                 break;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         //Right-down diagonal
@@ -115,19 +121,11 @@ impl Move {
                     break;
                 }
 
-                result.push(Move {
-                    from: index,
-                    to: target_index,
-                    en_passant: false,
-                });
+                result.push(Move::basic(index, target_index));
                 break;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         result
@@ -162,11 +160,7 @@ impl Move {
                 }
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         result
@@ -201,11 +195,7 @@ impl Move {
                 }
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         result
@@ -242,11 +232,7 @@ impl Move {
                 break;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
         }
 
         //Check diagonals for captures
@@ -267,11 +253,7 @@ impl Move {
                     continue;
                 }
 
-                result.push(Move {
-                    from: index,
-                    to: target_index,
-                    en_passant: false,
-                });
+                result.push(Move::basic(index, target_index));
             }
         }
 
@@ -289,11 +271,10 @@ impl Move {
 
             let diff = ep_col - col;
 
-            result.push(Move {
-                from: index,
-                to: Board::get_index((row + team_modifier) as usize, (col + diff) as usize),
-                en_passant: true,
-            })
+            result.push(Move::en_passant(
+                index,
+                Board::get_index((row + team_modifier) as usize, (col + diff) as usize),
+            ));
         }
 
         result
@@ -332,11 +313,7 @@ impl Move {
                 stop = true;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
 
             if stop {
                 break;
@@ -356,11 +333,7 @@ impl Move {
                 stop = true;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
 
             if stop {
                 break;
@@ -380,11 +353,7 @@ impl Move {
                 stop = true;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
 
             if stop {
                 break;
@@ -404,11 +373,7 @@ impl Move {
                 stop = true;
             }
 
-            result.push(Move {
-                from: index,
-                to: target_index,
-                en_passant: false,
-            });
+            result.push(Move::basic(index, target_index));
 
             if stop {
                 break;

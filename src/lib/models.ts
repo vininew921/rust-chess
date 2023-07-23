@@ -35,4 +35,5 @@ export type Move = {
   from: number;
   to: number;
   en_passant: boolean;
+  promotion_piece: PieceType | null;
 };

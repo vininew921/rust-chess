@@ -1,7 +1,7 @@
 use serde::Serialize;
-use serde_repr::Serialize_repr;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
-#[derive(Debug, Clone, Copy, Serialize_repr, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize_repr, PartialEq, Deserialize_repr)]
 #[repr(u8)]
 pub enum PieceType {
     Empty = 0,
