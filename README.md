@@ -1,6 +1,6 @@
 # Rust Chess
 
-Implemented using the Tauri framework (Rust + Svelte).
+Implemented using the Tauri framework (Rust + Svelte). **UNFINISHED**
 
 ## Development Prerequisites
 
